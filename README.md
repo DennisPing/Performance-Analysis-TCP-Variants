@@ -65,10 +65,6 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 ├── README.md
 └── results             <-- Experiment results
     ├── exp01
-    │   ├── exp01_Newreno.csv
-    │   ├── exp01_Reno.csv
-    │   ├── exp01_Tahoe.csv
-    │   └── exp01_Vegas.csv
     ├── exp02
     └── exp03
 ```
