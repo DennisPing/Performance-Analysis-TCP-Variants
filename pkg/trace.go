@@ -2,6 +2,7 @@ package common
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -14,7 +15,7 @@ type Trace struct {
 	from        int
 	to          int
 	packet_type string
-	packet_size float64
+	packet_size int
 	fid         int
 	seq         int
 	packet_id   int
@@ -27,7 +28,7 @@ func (t *Trace) ToString() string {
 		strconv.Itoa(t.from) + " " +
 		strconv.Itoa(t.to) + " " +
 		t.packet_type + " " +
-		strconv.FormatFloat(t.packet_size, 'f', -1, 64) + " " +
+		strconv.Itoa(t.packet_size) + " " +
 		strconv.Itoa(t.fid) + " " +
 		strconv.Itoa(t.seq) + " " +
 		strconv.Itoa(t.packet_id)
@@ -50,7 +51,7 @@ func ParseTraceFile(file string) ([]*Trace, error) {
 		time, _ := strconv.ParseFloat(fields[1], 64)
 		from, _ := strconv.Atoi(fields[2])
 		to, _ := strconv.Atoi(fields[3])
-		packet_size, _ := strconv.ParseFloat(fields[5], 64)
+		packet_size, _ := strconv.Atoi(fields[5])
 		fid, _ := strconv.Atoi(fields[7])
 		seq, _ := strconv.Atoi(fields[10])
 		packet_id, _ := strconv.Atoi(fields[11])
@@ -130,10 +131,10 @@ func CalculateThroughput(traces []*Trace, from_node int, to_node int, flow_start
 
 	sort.Float64s(recv_times)
 
-	var head int               // The index of the window head
-	var tail int               // The index of the window tail
-	var win_throughput float64 // The number of bytes in the current window
-	var tot_throughput float64 // The total running throughput
+	var head int           // The index of the window head
+	var tail int           // The index of the window tail
+	var win_throughput int // The number of bytes in the current window
+	var tot_throughput int // The total running throughput
 
 	for head < len(recv_times) {
 		// If a new trace enters the window
@@ -155,8 +156,39 @@ func CalculateThroughput(traces []*Trace, from_node int, to_node int, flow_start
 			head++
 			tail++
 		}
-		throughput_ticks = append(throughput_ticks, (float64(win_throughput) / window_size / 125000)) // In Mbps
+		throughput_ticks = append(throughput_ticks, (float64(win_throughput))/window_size/125000) // In Mbps
 	}
-	avg_throughput := (tot_throughput / (Max(time_ticks) - Min(time_ticks) - window_size)) / 125000 // In Mbps
+	avg_throughput := (float64(tot_throughput) / (Max(time_ticks) - Min(time_ticks) - window_size)) / 125000 // In Mbps
 	return time_ticks, throughput_ticks, avg_throughput
+}
+
+// Calculate latency vs time given a TCP flow start time
+// Return slice times, slice throughputs, and average latency
+func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start float64) ([]float64, []float64, float64) {
+	var time_ticks []float64
+	var latency_ticks []float64
+
+	// A map with {key, value} of seq, trace
+	start_traces := make(map[int]*Trace) // Traces of event '+'
+	end_traces := make(map[int]*Trace)   // Traces of event 'r'
+
+	// Iterate backwards through the trace list
+	// If you encounter a 'd' that matches from_node and to_node, skip the next 2 traces
+	// The next 2 traces will always be '+' and 'r' at the exact same time
+	for i := len(traces) - 1; i >= 0; i-- {
+		trace := traces[i]
+		if trace.event == "d" && trace.from == from_node && trace.to == to_node {
+			i -= 3
+			continue
+		} else if trace.event == "+" && trace.from == from_node {
+			start_traces[trace.seq] = trace
+		} else if trace.event == "r" && trace.to == from_node {
+			end_traces[trace.seq] = trace
+		}
+	}
+
+	fmt.Printf("Length of start_traces: %d\n", len(start_traces))
+	fmt.Printf("Length of end_traces: %d\n", len(end_traces))
+	return time_ticks, latency_ticks, 1.0
+
 }
