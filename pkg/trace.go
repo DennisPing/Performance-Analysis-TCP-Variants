@@ -17,7 +17,7 @@ type Trace struct {
 	packet_size int
 	fid         int
 	seq         int
-	packet_id   int
+	pid         int
 }
 
 // ToString function for Trace struct
@@ -31,7 +31,7 @@ func (t *Trace) ToString() string {
 		"-------" + " " +
 		strconv.Itoa(t.fid) + " " +
 		strconv.Itoa(t.seq) + " " +
-		strconv.Itoa(t.packet_id)
+		strconv.Itoa(t.pid)
 	return str
 }
 
@@ -54,7 +54,7 @@ func ParseTraceFile(file string) ([]*Trace, error) {
 		packet_size, _ := strconv.Atoi(fields[5])
 		fid, _ := strconv.Atoi(fields[7])
 		seq, _ := strconv.Atoi(fields[10])
-		packet_id, _ := strconv.Atoi(fields[11])
+		pid, _ := strconv.Atoi(fields[11])
 
 		trace := &Trace{
 			event:       fields[0],
@@ -65,7 +65,7 @@ func ParseTraceFile(file string) ([]*Trace, error) {
 			packet_size: packet_size,
 			fid:         fid,
 			seq:         seq,
-			packet_id:   packet_id,
+			pid:         pid,
 		}
 		traces = append(traces, trace)
 	}
@@ -146,7 +146,7 @@ func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start fl
 	var time_ticks []float64
 	var latency_ticks []float64
 
-	// A hashmap with {key, value} of {seq, Trace}
+	// A hashmap with {key, value} of {pid, Trace}
 	start_traces := make(map[int]*Trace) // Traces of event '+'
 	end_traces := make(map[int]*Trace)   // Traces of event 'r'
 
@@ -159,16 +159,16 @@ func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start fl
 			i -= 3
 			continue
 		} else if trace.event == "+" && trace.from == from_node && trace.to == to_node {
-			start_traces[trace.seq] = trace
+			start_traces[trace.pid] = trace
 		} else if trace.event == "r" && trace.from == from_node && trace.to == to_node {
-			end_traces[trace.seq] = trace
+			end_traces[trace.pid] = trace
 		}
 	}
 
 	// In some cases, the number of start_traces > end_traces. That's ok.
 	// A failed hashmap lookup is just a no-op
 	for _, end_trace := range end_traces {
-		start_trace, ok := start_traces[end_trace.seq] // Find the matches
+		start_trace, ok := start_traces[end_trace.pid] // Find the matches
 		if ok {
 			latency := end_trace.time - start_trace.time
 			time_ticks = append(time_ticks, end_trace.time)
