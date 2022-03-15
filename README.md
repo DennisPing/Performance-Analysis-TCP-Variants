@@ -13,7 +13,7 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 
 * Go 1.15+
 * Python 3.7+
-    ```
+    ```txt
     matplotlib
     numpy
     pandas
@@ -22,12 +22,12 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 ## How to Build
 
 * Build all 3 experiments
-    ```
+    ```txt
     make
     ```
 
 * Build individual experiments
-    ```
+    ```txt
     make exp01
     make exp02
     make exp03
