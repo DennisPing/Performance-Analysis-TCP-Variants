@@ -16,8 +16,8 @@ import (
 
 func main() {
 
-	// agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
-	agents := []string{"Agent/TCP/Vegas"}
+	agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
+	// agents := []string{"Agent/TCP/Vegas"}
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
 
@@ -115,15 +115,14 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 	defer file2.Close()
 	w := csv.NewWriter(file2)
 	defer w.Flush()
+
 	for _, result := range results {
-		cbr_rate := strconv.Itoa(int(result[0]))
-		avg_throughput := strconv.FormatFloat(result[1], 'f', 10, 64)
-		std_throughput := strconv.FormatFloat(result[2], 'f', 10, 64)
-		avg_latency := strconv.FormatFloat(result[3], 'f', 10, 64)
-		std_latency := strconv.FormatFloat(result[4], 'f', 10, 64)
-		avg_drops := strconv.FormatFloat(result[5], 'f', 10, 64)
-		std_drops := strconv.FormatFloat(result[6], 'f', 10, 64)
-		w.Write([]string{cbr_rate, avg_throughput, std_throughput, avg_latency, std_latency, avg_drops, std_drops})
+		line := make([]string, len(result))
+		line[0] = strconv.Itoa(int(result[0])) // cbr_rate is an int
+		for i := 1; i < len(result); i++ {
+			line[i] = strconv.FormatFloat(result[i], 'f', 10, 64) // everything else is a float
+		}
+		w.Write(line)
 	}
 }
 
