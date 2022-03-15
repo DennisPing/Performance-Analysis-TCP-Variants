@@ -16,16 +16,17 @@ import (
 
 func main() {
 
-	agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
+	// agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
+	agents := []string{"Agent/TCP/Vegas"}
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
 
 	// Check if the output directory exists
-	if _, err := os.Stat(basedir + "/results"); os.IsNotExist(err) {
-		os.Mkdir(basedir+"/results", 0777)
+	if _, err := os.Stat(basedir + "/temp"); os.IsNotExist(err) {
+		os.Mkdir(basedir+"/temp", 0777)
 	}
-	if _, err := os.Stat(basedir + "/results/exp01"); os.IsNotExist(err) {
-		os.Mkdir(basedir+"/results/exp01", 0777)
+	if _, err := os.Stat(basedir + "/temp/exp01"); os.IsNotExist(err) {
+		os.Mkdir(basedir+"/temp/exp01", 0777)
 	}
 
 	wg := new(sync.WaitGroup)
@@ -50,7 +51,7 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
-	filename := basedir + "/results/exp01/exp01_" + suffix + ".csv"
+	filename := basedir + "/temp/exp01/exp01_" + suffix + ".csv"
 	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -99,10 +100,8 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 		std_latency := pkg.StdDev(cumul_latencies)
 		std_drops := pkg.StdDev(cumul_drops)
 
-		fmt.Printf("Avg latency: %f\n", avg_latency)
-		fmt.Printf("Std latency: %f\n", std_latency)
-
-		results = append(results, []float64{float64(rate), avg_throughput, std_throughput, avg_latency, std_latency, avg_drops, std_drops})
+		results = append(results, []float64{float64(rate), avg_throughput, std_throughput, avg_latency,
+			std_latency, avg_drops, std_drops})
 
 		end := time.Since(start).Round(time.Second)
 		fmt.Printf("Finished %s with rate %d in %s\n", agent, rate, end)
@@ -135,7 +134,8 @@ func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start f
 	filename := "outfile_" + suffix + ".tr"
 
 	// Run a command from the shell
-	cmd := exec.Command("ns", "../ns2/simulation01.tcl", agent, strconv.FormatFloat(tcp_start, 'f', -1, 64), strconv.FormatFloat(cbr_start, 'f', -1, 64), strconv.FormatFloat(cbr_rate, 'f', -1, 64), filename, "False")
+	cmd := exec.Command("ns", "../ns2/simulation01.tcl", agent, strconv.FormatFloat(tcp_start, 'f', -1, 64),
+		strconv.FormatFloat(cbr_start, 'f', -1, 64), strconv.FormatFloat(cbr_rate, 'f', -1, 64), filename, "False")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()

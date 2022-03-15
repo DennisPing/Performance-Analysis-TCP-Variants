@@ -146,7 +146,7 @@ func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start fl
 	var time_ticks []float64
 	var latency_ticks []float64
 
-	// A map with {key, value} of seq, trace
+	// A hashmap with {key, value} of {seq, Trace}
 	start_traces := make(map[int]*Trace) // Traces of event '+'
 	end_traces := make(map[int]*Trace)   // Traces of event 'r'
 
@@ -158,27 +158,24 @@ func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start fl
 		if trace.event == "d" && trace.from == from_node && trace.to == to_node {
 			i -= 3
 			continue
-		} else if trace.event == "+" && trace.to == from_node {
+		} else if trace.event == "+" && trace.from == from_node && trace.to == to_node {
 			start_traces[trace.seq] = trace
-		} else if trace.event == "r" && trace.from == from_node {
+		} else if trace.event == "r" && trace.from == from_node && trace.to == to_node {
 			end_traces[trace.seq] = trace
 		}
 	}
 
-	var tot_latency float64
-	// In rare cases, the number of start_traces and end_traces may not match
-	// But a failed hashmap lookup is just a no-op
+	// In some cases, the number of start_traces > end_traces. That's ok.
+	// A failed hashmap lookup is just a no-op
 	for _, end_trace := range end_traces {
-		start_trace, ok := start_traces[end_trace.seq]
+		start_trace, ok := start_traces[end_trace.seq] // Find the matches
 		if ok {
 			latency := end_trace.time - start_trace.time
-			tot_latency += latency
 			time_ticks = append(time_ticks, end_trace.time)
 			latency_ticks = append(latency_ticks, latency)
 		}
 	}
-	avg_latency := tot_latency / float64(len(start_traces))
-	return time_ticks, latency_ticks, avg_latency
+	return time_ticks, latency_ticks, Mean(latency_ticks)
 }
 
 // Count the number of dropped packets. The trace should already be filtered by fid
