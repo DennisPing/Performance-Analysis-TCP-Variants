@@ -1,5 +1,38 @@
 # Performance-Analysis-TCP-Variants
 
+Matthew Jones  
+Dennis Ping
+
+## Background
+
+This project was initially done in Python and was ported to Go for self-learning purposes.
+
+All 3 experiments run with multithreading for faster computation. All 3 experiments run for 100 trails per test scenario in order to obtain statistical reliability. The graphs are generated with Python.
+
+## Requirements
+
+* Go 1.15+
+* Python 3.7+
+    ```
+    matplotlib
+    numpy
+    pandas
+    ```
+
+## How to Build
+
+* Build all 3 experiments
+    ```
+    make
+    ```
+
+* Build individual experiments
+    ```
+    make exp01
+    make exp02
+    make exp03
+    ```
+
 ## Project Setup
 
 ```txt
@@ -15,9 +48,6 @@
 │   │   └── main.go
 │   └── exp03
 │       └── main.go
-├── common              <-- Common packages
-│   ├── stats.go
-│   └── trace.go
 ├── go.mod
 ├── graph               <-- Graph results with Python
 │   ├── graph_exp01.py
@@ -29,6 +59,9 @@
 │   ├── simulation01.tcl
 │   ├── simulation02.tcl
 │   └── simulation03.tcl
+├── pkg                 <-- shared packages
+│   ├── stats.go
+│   └── trace.go
 ├── README.md
 └── results             <-- Experiment results
     ├── exp01
@@ -38,5 +71,4 @@
     │   └── exp01_Vegas.csv
     ├── exp02
     └── exp03
-
 ```
