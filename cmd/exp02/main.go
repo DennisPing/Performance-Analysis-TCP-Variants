@@ -77,10 +77,10 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 
 	var results [][]float64
 
-	// The main simulation loop of 50 trails for each cbr_rate from 1 to 9 Mbps
+	// The main simulation loop for cbr_rate of 1 to 9 Mbps
 	for rate := 1; rate < 10; rate++ {
 		start := time.Now()
-		fmt.Printf("Starting %s/%s with rate %d\n", agent1, agent2, rate)
+		fmt.Printf("Starting %s/%s with rate %d\n", suffix1, suffix2, rate)
 		cumul_throughputs1 := make([]float64, 0)
 		cumul_latencies1 := make([]float64, 0)
 		cumul_drops1 := make([]float64, 0)
@@ -91,10 +91,10 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 
 		// Simulation variables
 		fid := 1
-		from_node := 1 // ns2 counts from 0, so this is node #2 in the diagram
+		from_node := 1 // ns2 counts from 0, so this is N2 -> N3
 		to_node := 2
 
-		for tcp2_start := 0.0; tcp2_start <= 5.0; tcp2_start += 0.05 {
+		for tcp2_start := 0.0; tcp2_start <= 8.0; tcp2_start += 0.08 {
 			traces := Simulation02(agent1, agent2, fid, from_node, to_node, tcp2_start, float64(rate))
 
 			// Prepare the trace data
@@ -109,8 +109,8 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 			drops1 := pkg.CountDrops(traces1)
 
 			_, _, throughput2 := pkg.CalculateThroughput(traces2, from_node, to_node, tcp2_start, window_size)
-			_, _, latency2 := pkg.CalculateLatency(traces1, from_node, to_node, tcp2_start)
-			drops2 := pkg.CountDrops(traces1)
+			_, _, latency2 := pkg.CalculateLatency(traces2, from_node, to_node, tcp2_start)
+			drops2 := pkg.CountDrops(traces2)
 
 			// Add the results to the cumulative results
 			cumul_throughputs1 = append(cumul_throughputs1, throughput1)
@@ -141,7 +141,7 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 				avg_throughput2, std_throughput2, avg_latency2, std_latency2, avg_drops2, std_drops2})
 
 		end := time.Since(start).Round(time.Second)
-		fmt.Printf("Finished %s/%s with rate %d in %s\n", agent1, agent2, rate, end)
+		fmt.Printf("Finished %s/%s with rate %d in %s\n", suffix1, suffix2, rate, end)
 	}
 
 	// Write results to CSV file
@@ -163,7 +163,7 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 	}
 }
 
-// Run Simulation 1 using ns2 and return a slice of traces
+// Run Simulation 2 using ns2 and return a slice of traces. CBR always starts at t=0 here.
 func Simulation02(agent1 string, agent2 string, fid int, from_node int, to_node int, tcp2_start float64, cbr_rate float64) []*pkg.Trace {
 	split1 := strings.Split(agent1, "/")
 	suffix1 := split1[len(split1)-1]
@@ -173,7 +173,7 @@ func Simulation02(agent1 string, agent2 string, fid int, from_node int, to_node 
 
 	// Run a command from the shell
 	tcp2Start := strconv.FormatFloat(tcp2_start, 'f', -1, 64)
-	cmd := exec.Command("ns", "../ns2/simulation02.tcl", agent1, agent2, tcp2Start, strconv.FormatFloat(cbr_start, 'f', -1, 64), strconv.FormatFloat(cbr_rate, 'f', -1, 64), filename, "False")
+	cmd := exec.Command("ns", "../ns2/simulation02.tcl", agent1, agent2, tcp2Start, strconv.FormatFloat(cbr_rate, 'f', -1, 64), filename, "False")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
