@@ -104,13 +104,10 @@ $udp set fid_ 2
 set cbr [new Application/Traffic/CBR]
 $cbr attach-agent $udp
 $cbr set type_ CBR
-# $cbr set interval_ 0.01
-# $cbr set packetSize_ 1000
 $cbr set rate_ ${cbrRate}Mb
 # Note: rate_ and interval_ are mutually exclusive. Just choose one.
 # Note: Either use just (rate_) or (interval_ and packetSize_)
-# Note: TCL does not appear to be case sensitive. 10Mb and 10mb are the same.
-# Warning: TCL is space sensitive. 10Mb is correct while 10 Mb is not.
+# Note: 10Mb and 10mb are the same. But TCL is space sensitive. 10Mb and 10 Mb are NOT the same.
 
 # Schedule events for the CBR agent
 $ns at $cbrStart "$cbr start"

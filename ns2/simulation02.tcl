@@ -128,27 +128,25 @@ $udp set fid_ 3
 set cbr [new Application/Traffic/CBR]
 $cbr attach-agent $udp
 $cbr set type_ CBR
-# $cbr set interval_ 0.01
-# $cbr set packetSize_ 1000
 $cbr set rate_ ${cbrRate}Mb
 # Note: rate_ and interval_ are mutually exclusive. Just choose one.
 # Note: Either use just (rate_) or (interval_ and packetSize_)
-# Note: TCL does not appear to be case sensitive. 10Mb and 10mb are the same.
-# Warning: TCL is space sensitive. 10Mb is correct while 10 Mb is not.
+# Note: 10Mb and 10mb are the same. But TCL is space sensitive. 10Mb and 10 Mb are NOT the same.
 
-# Schedule events for the CBR agent
+# tcpStart1 always starts at 4 seconds
+# tcpStart2 starts between 0 to 8 seconds; step size 0.08; total 100 trials
 $ns at 0 "$cbr start"
 $ns at 4 "$ftp1 start"
 $ns at $tcpStart2 "$ftp2 start"
-$ns at 30.0 "$cbr stop"
-$ns at 30.0 "$ftp1 stop"
-$ns at 30.0 "$ftp2 stop"
+$ns at [expr {$tcpStart2+30.0}] "$cbr stop"
+$ns at [expr {$tcpStart2+30.0}] "$ftp1 stop"
+$ns at [expr {$tcpStart2+30.0}] "$ftp2 stop"
 
 # Detach tcp and sink agents
-$ns at 29.5 "$ns detach-agent $n1 $tcp1 ; $ns detach-agent $n4 $sink1; $ns detach-agent $n5 $tcp2 ; $ns detach-agent $n6 $sink2"
+$ns at [expr {$tcpStart2+29.5}] "$ns detach-agent $n1 $tcp1 ; $ns detach-agent $n4 $sink1; $ns detach-agent $n5 $tcp2 ; $ns detach-agent $n6 $sink2"
 
 # Call the finish procedure when the simulation is done
-$ns at 30.0 "finish"
+$ns at [expr {$tcpStart2+30.0}] "finish"
 
 if { $verbose == True } {
     puts " "
