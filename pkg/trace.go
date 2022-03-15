@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -29,6 +28,7 @@ func (t *Trace) ToString() string {
 		strconv.Itoa(t.to) + " " +
 		t.packet_type + " " +
 		strconv.Itoa(t.packet_size) + " " +
+		"-------" + " " +
 		strconv.Itoa(t.fid) + " " +
 		strconv.Itoa(t.seq) + " " +
 		strconv.Itoa(t.packet_id)
@@ -72,17 +72,6 @@ func ParseTraceFile(file string) ([]*Trace, error) {
 	return traces, err
 }
 
-// Remove all traces of type 'cbr'
-func RemoveCBR(traces []*Trace) []*Trace {
-	var filtered []*Trace
-	for _, trace := range traces {
-		if trace.packet_type != "cbr" {
-			filtered = append(filtered, trace)
-		}
-	}
-	return filtered
-}
-
 // Get a slice of traces of flow id 'fid'
 func FilterByFid(traces []*Trace, fid int) []*Trace {
 	var filtered []*Trace
@@ -94,7 +83,7 @@ func FilterByFid(traces []*Trace, fid int) []*Trace {
 	return filtered
 }
 
-// Get a slice of traces of type 'packet_type'
+// Get a slice of traces of type 'packet_type' (tcp, cbr, ack)
 func FilterByType(traces []*Trace, packet_type string) []*Trace {
 	var filtered []*Trace
 	for _, trace := range traces {
@@ -103,17 +92,6 @@ func FilterByType(traces []*Trace, packet_type string) []*Trace {
 		}
 	}
 	return filtered
-}
-
-// Count the number of dropped packets for a given 'fid'
-func CountDrops(traces []*Trace, fid int) int {
-	var drops int
-	for _, trace := range traces {
-		if trace.fid == fid && trace.event == "d" {
-			drops++
-		}
-	}
-	return drops
 }
 
 // Calculate throughput vs time given a TCP flow start time
@@ -180,15 +158,36 @@ func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start fl
 		if trace.event == "d" && trace.from == from_node && trace.to == to_node {
 			i -= 3
 			continue
-		} else if trace.event == "+" && trace.from == from_node {
+		} else if trace.event == "+" && trace.to == from_node {
 			start_traces[trace.seq] = trace
-		} else if trace.event == "r" && trace.to == from_node {
+		} else if trace.event == "r" && trace.from == from_node {
 			end_traces[trace.seq] = trace
 		}
 	}
 
-	fmt.Printf("Length of start_traces: %d\n", len(start_traces))
-	fmt.Printf("Length of end_traces: %d\n", len(end_traces))
-	return time_ticks, latency_ticks, 1.0
+	var tot_latency float64
+	// In rare cases, the number of start_traces and end_traces may not match
+	// But a failed hashmap lookup is just a no-op
+	for _, end_trace := range end_traces {
+		start_trace, ok := start_traces[end_trace.seq]
+		if ok {
+			latency := end_trace.time - start_trace.time
+			tot_latency += latency
+			time_ticks = append(time_ticks, end_trace.time)
+			latency_ticks = append(latency_ticks, latency)
+		}
+	}
+	avg_latency := tot_latency / float64(len(start_traces))
+	return time_ticks, latency_ticks, avg_latency
+}
 
+// Count the number of dropped packets. The trace should already be filtered by fid
+func CountDrops(traces []*Trace) int {
+	var drops int
+	for _, trace := range traces {
+		if trace.event == "d" {
+			drops++
+		}
+	}
+	return drops
 }

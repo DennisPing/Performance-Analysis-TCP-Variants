@@ -11,13 +11,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/DennisPing/Performance-Analysis-TCP-Variants/common"
+	"github.com/DennisPing/Performance-Analysis-TCP-Variants/pkg"
 )
 
 func main() {
 
 	agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
-
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
 
@@ -32,14 +31,14 @@ func main() {
 	wg := new(sync.WaitGroup)
 	wg.Add(len(agents))
 	for _, agent := range agents {
-		go ConcurrentSimulation(wg, agent)
+		go Experiment01(wg, agent)
 	}
 	wg.Wait()
 	fmt.Println("Finished!")
 
 }
 
-func ConcurrentSimulation(wg *sync.WaitGroup, agent string) {
+func Experiment01(wg *sync.WaitGroup, agent string) {
 	defer wg.Done()
 
 	// Split the agent string by '/' and get the last element
@@ -51,42 +50,60 @@ func ConcurrentSimulation(wg *sync.WaitGroup, agent string) {
 
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
-	filename := basedir + "/test/exp01/exp01_" + suffix + ".csv"
+	filename := basedir + "/results/exp01/exp01_" + suffix + ".csv"
 	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
-	file.WriteString("cbr_rate,avg_throughput,std_throughput\n")
+	file.WriteString("cbr_rate,avg_throughput,std_throughput,avg_latency,std_latency,avg_drops,std_drops\n")
 	file.Close()
 
-	// A 3D slice to store cbr_rate, avg_throughput, std_throughput
-	var results [][][]float64
+	var results [][]float64
 
 	// The main simulation loop of 50 trails for each cbr_rate from 1 to 9 Mbps
 	for rate := 1; rate < 10; rate++ {
 		start := time.Now()
 		fmt.Printf("Starting %s with rate %d\n", agent, rate)
 		cumul_throughputs := make([]float64, 0)
+		cumul_latencies := make([]float64, 0)
+		cumul_drops := make([]float64, 0)
 
 		// Simulation variables
 		fid := 1
-		from_node := 1
+		from_node := 1 // ns2 counts from 0, so this is node #2 in the diagram
 		to_node := 2
 		cbr_start := 0.0
 
 		for tcp_start := 0.5; tcp_start <= 5.5; tcp_start += 0.1 {
 			traces := Simulation01(agent, fid, from_node, to_node, tcp_start, cbr_start, float64(rate))
+			// Prepare the trace data
+			traces = pkg.FilterByType(traces, "tcp")
+			traces = pkg.FilterByFid(traces, fid)
+
+			// Calculate throughput, latency, and dropped packets
 			window_size := 0.2
-			_, _, throughput := common.CalculateThroughput(traces, from_node, to_node, tcp_start, window_size)
+			_, _, throughput := pkg.CalculateThroughput(traces, from_node, to_node, tcp_start, window_size)
+			_, _, latency := pkg.CalculateLatency(traces, from_node, to_node, tcp_start)
+			drops := pkg.CountDrops(traces)
+
 			cumul_throughputs = append(cumul_throughputs, throughput)
+			cumul_latencies = append(cumul_latencies, latency)
+			cumul_drops = append(cumul_drops, float64(drops))
 		}
 
-		avg_throughput := common.Mean(cumul_throughputs)
-		std_throughput := common.StdDev(cumul_throughputs)
-		results = append(results, [][]float64{
-			{float64(rate), avg_throughput, std_throughput},
-		})
+		avg_throughput := pkg.Mean(cumul_throughputs)
+		avg_latency := pkg.Mean(cumul_latencies)
+		avg_drops := pkg.Mean(cumul_drops)
+		std_throughput := pkg.StdDev(cumul_throughputs)
+		std_latency := pkg.StdDev(cumul_latencies)
+		std_drops := pkg.StdDev(cumul_drops)
+
+		fmt.Printf("Avg latency: %f\n", avg_latency)
+		fmt.Printf("Std latency: %f\n", std_latency)
+
+		results = append(results, []float64{float64(rate), avg_throughput, std_throughput, avg_latency, std_latency, avg_drops, std_drops})
+
 		end := time.Since(start).Round(time.Second)
 		fmt.Printf("Finished %s with rate %d in %s\n", agent, rate, end)
 	}
@@ -100,12 +117,19 @@ func ConcurrentSimulation(wg *sync.WaitGroup, agent string) {
 	w := csv.NewWriter(file2)
 	defer w.Flush()
 	for _, result := range results {
-		w.Write([]string{strconv.Itoa(int(result[0][0])), strconv.FormatFloat(result[0][1], 'f', -1, 64), strconv.FormatFloat(result[0][2], 'f', -1, 64)})
+		cbr_rate := strconv.Itoa(int(result[0]))
+		avg_throughput := strconv.FormatFloat(result[1], 'f', 10, 64)
+		std_throughput := strconv.FormatFloat(result[2], 'f', 10, 64)
+		avg_latency := strconv.FormatFloat(result[3], 'f', 10, 64)
+		std_latency := strconv.FormatFloat(result[4], 'f', 10, 64)
+		avg_drops := strconv.FormatFloat(result[5], 'f', 10, 64)
+		std_drops := strconv.FormatFloat(result[6], 'f', 10, 64)
+		w.Write([]string{cbr_rate, avg_throughput, std_throughput, avg_latency, std_latency, avg_drops, std_drops})
 	}
 }
 
-// Run Simulation 1 using ns2 return a slice of traces
-func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start float64, cbr_start float64, cbr_rate float64) []*common.Trace {
+// Run Simulation 1 using ns2 and return a slice of traces
+func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start float64, cbr_start float64, cbr_rate float64) []*pkg.Trace {
 	split := strings.Split(agent, "/")
 	suffix := split[len(split)-1]
 	filename := "outfile_" + suffix + ".tr"
@@ -119,14 +143,10 @@ func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start f
 		panic(err)
 	}
 
-	traces, err := common.ParseTraceFile(filename)
+	traces, err := pkg.ParseTraceFile(filename)
 	if err != nil {
 		panic(err)
 	}
 	os.Remove(filename)
-
-	// Prepare the trace data
-	traces = common.FilterByType(traces, "tcp")
-	traces = common.FilterByFid(traces, fid)
 	return traces
 }
