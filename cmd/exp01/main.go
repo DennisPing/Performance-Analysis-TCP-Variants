@@ -62,10 +62,10 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 
 	var results [][]float64
 
-	// The main simulation loop of 50 trails for each cbr_rate from 1 to 9 Mbps
+	// The main simulation loop for cbr_rate of from 1 to 9 Mbps
 	for rate := 1; rate < 10; rate++ {
 		start := time.Now()
-		fmt.Printf("Starting %s with rate %d\n", agent, rate)
+		fmt.Printf("Starting %s with rate %d\n", suffix, rate)
 		cumul_throughputs := make([]float64, 0)
 		cumul_latencies := make([]float64, 0)
 		cumul_drops := make([]float64, 0)
@@ -104,7 +104,7 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 			std_latency, avg_drops, std_drops})
 
 		end := time.Since(start).Round(time.Second)
-		fmt.Printf("Finished %s with rate %d in %s\n", agent, rate, end)
+		fmt.Printf("Finished %s with rate %d in %s\n", suffix, rate, end)
 	}
 
 	// Write results to CSV file
