@@ -72,7 +72,9 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 		panic(err)
 	}
 	defer file.Close()
-	file.WriteString("cbr_rate,avg_throughput1,std_throughput1,avg_latency1,std_latency1,avg_drops1,std_drops1,avg_throughput2,std_throughput2,avg_latency2,std_latency2,avg_drops2,std_drops2\n")
+	header := "cbr_rate,avg_throughput1,std_throughput1,avg_latency1,std_latency1,avg_drops1,std_drops1," +
+		"avg_throughput2,std_throughput2,avg_latency2,std_latency2,avg_drops2,std_drops2\n"
+	file.WriteString(header)
 	file.Close()
 
 	var results [][]float64
@@ -94,7 +96,7 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 		from_node := 1 // ns2 counts from 0, so this is N2 -> N3
 		to_node := 2
 
-		for tcp2_start := 0.0; tcp2_start <= 8.0; tcp2_start += 0.08 {
+		for tcp2_start := 0.0; tcp2_start <= 8.0; tcp2_start += 0.16 {
 			traces := Simulation02(agent1, agent2, fid, from_node, to_node, tcp2_start, float64(rate))
 
 			// Prepare the trace data

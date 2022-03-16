@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -64,7 +65,10 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 		panic(err)
 	}
 	defer file.Close()
-	file.WriteString("avg_throughput1,std_throughput1,avg_latency1,std_latency1,avg_drops1,std_drops1,avg_throughput2,std_throughput2,avg_latency2,std_latency2,avg_drops2,std_drops2\n")
+
+	header := "avg_throughput1,std_throughput1,avg_latency1,std_latency1,avg_drops1,std_drops1," +
+		"avg_throughput2,std_throughput2,avg_latency2,std_latency2,avg_drops2,std_drops2\n"
+	file.WriteString(header)
 	file.Close()
 
 	var results [][]float64
@@ -79,13 +83,16 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 	cumul_latencies2 := make([]float64, 0)
 	cumul_drops2 := make([]float64, 0)
 
+	// sample_times := make([]float64, 0)
+	// sample_throughputs := make([]float64, 0)
+
 	// Simulation variables
 	fid := 1
 	from_node := 1 // ns2 counts from 0, so this is N2 -> N3
 	to_node := 2
 
 	// TCP starts at t=0, let it stabilize, then start CBR at t=5
-	for cbr_start := 5.0; cbr_start <= 10.0; cbr_start += 0.05 {
+	for cbr_start := 5.0; cbr_start <= 10.0; cbr_start += 0.1 {
 		traces := Simulation03(agent, queue, fid, from_node, to_node, cbr_start)
 
 		// Prepare the trace data
@@ -96,11 +103,11 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 
 		// Calculate throughput, latency, and dropped packets
 		window_size := 0.2
-		_, _, throughput1 := pkg.CalculateThroughput(tcpTraces, from_node, to_node, 0.0, window_size)
+		time_ticks1, throughput_ticks1, throughput1 := pkg.CalculateThroughput(tcpTraces, from_node, to_node, 0.0, window_size)
 		_, _, latency1 := pkg.CalculateLatency(tcpTraces, from_node, to_node, 0.0)
 		drops1 := pkg.CountDrops(tcpTraces)
 
-		_, _, throughput2 := pkg.CalculateThroughput(cbrTraces, from_node, to_node, cbr_start, window_size)
+		time_ticks2, throughput_ticks2, throughput2 := pkg.CalculateThroughput(cbrTraces, from_node, to_node, cbr_start, window_size)
 		_, _, latency2 := pkg.CalculateLatency(cbrTraces, from_node, to_node, cbr_start)
 		drops2 := pkg.CountDrops(cbrTraces)
 
@@ -112,6 +119,29 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 		cumul_throughputs2 = append(cumul_throughputs2, throughput2)
 		cumul_latencies2 = append(cumul_latencies2, latency2)
 		cumul_drops2 = append(cumul_drops2, float64(drops2))
+
+		// Record the time vs throughput for t=10 specifically
+		if math.Abs(cbr_start-10.0) < 0.001 {
+			// Write time_ticks1 (column 1) and thoughtput_ticks1 (column 2) to a csv file
+			file, err := os.Create(basedir + "/results/exp03/exp03_" + suffix + "_" + queue + "_TCP.csv")
+			if err != nil {
+				panic(err)
+			}
+			defer file.Close()
+			file.WriteString("time_ticks,throughput_ticks\n")
+			for i, tick := range time_ticks1 {
+				file.WriteString(fmt.Sprintf("%f,%f\n", tick, throughput_ticks1[i]))
+			}
+			file2, err2 := os.Create(basedir + "/results/exp03/exp03_" + suffix + "_" + queue + "_CBR.csv")
+			if err2 != nil {
+				panic(err2)
+			}
+			defer file2.Close()
+			file2.WriteString("time_ticks,throughput_ticks\n")
+			for i, tick := range time_ticks2 {
+				file2.WriteString(fmt.Sprintf("%f,%f\n", tick, throughput_ticks2[i]))
+			}
+		}
 	}
 
 	avg_throughput1 := pkg.Mean(cumul_throughputs1)
@@ -133,7 +163,7 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 			avg_throughput2, std_throughput2, avg_latency2, std_latency2, avg_drops2, std_drops2})
 
 	end := time.Since(start).Round(time.Second)
-	fmt.Printf("Finished %s with queue %s in %d\n", agent, queue, end)
+	fmt.Printf("Finished %s with queue %s in %s\n", suffix, queue, end)
 
 	// Write results to CSV file
 	file2, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -146,7 +176,7 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 
 	for _, result := range results {
 		line := make([]string, len(result))
-		for i := 1; i < len(result); i++ {
+		for i := 0; i < len(result); i++ {
 			line[i] = strconv.FormatFloat(result[i], 'f', 10, 64) // everything else is a float
 		}
 		w.Write(line)
