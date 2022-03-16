@@ -47,7 +47,6 @@ func ParseTraceFile(file string) ([]*Trace, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		fields := strings.Split(line, " ")
-		// Create a new Trace struct
 		time, _ := strconv.ParseFloat(fields[1], 64)
 		from, _ := strconv.Atoi(fields[2])
 		to, _ := strconv.Atoi(fields[3])
@@ -124,7 +123,7 @@ func CalculateThroughput(traces []*Trace, from_node int, to_node int, flow_start
 			// If a trace leaves the window
 		} else if recv_times[head] > recv_times[tail]+window_size {
 			win_throughput -= traces[tail].packet_size
-			time_ticks = append(time_ticks, recv_times[tail])
+			time_ticks = append(time_ticks, recv_times[tail]+window_size)
 			tail++
 			// If a trace enters the window and leaves the window at the same time
 		} else {
