@@ -47,7 +47,7 @@ def main():
     fig2, ax2 = plt.subplots()
     fig3, ax3 = plt.subplots()
 
-    dir = "../temp/exp01"
+    dir = "../results/exp01"
     csvfiles = ["exp01_Tahoe.csv", "exp01_Reno.csv", "exp01_Newreno.csv", "exp01_Vegas.csv"]
 
     colorMap = {"Tahoe": "tab:red",
