@@ -172,8 +172,8 @@ func Simulation02(agent1 string, agent2 string, fid int, from_node int, to_node 
 	filename := "outfile_" + suffix1 + "_" + suffix2 + ".tr"
 
 	// Run a command from the shell
-	tcp2Start := strconv.FormatFloat(tcp2_start, 'f', -1, 64)
-	cmd := exec.Command("ns", "../ns2/simulation02.tcl", agent1, agent2, tcp2Start, strconv.FormatFloat(cbr_rate, 'f', -1, 64), filename, "False")
+	cmd := exec.Command("ns", "../ns2/simulation02.tcl", agent1, agent2, strconv.FormatFloat(tcp2_start, 'f', -1, 64),
+		strconv.FormatFloat(cbr_rate, 'f', -1, 64), filename, "False")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()

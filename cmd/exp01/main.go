@@ -17,16 +17,16 @@ import (
 func main() {
 
 	agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
-	// agents := []string{"Agent/TCP/Vegas"}
+	// agents := []string{"Agent/TCP/Reno"}
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
 
 	// Check if the output directory exists
-	if _, err := os.Stat(basedir + "/temp"); os.IsNotExist(err) {
-		os.Mkdir(basedir+"/temp", 0777)
+	if _, err := os.Stat(basedir + "/results"); os.IsNotExist(err) {
+		os.Mkdir(basedir+"/results", 0777)
 	}
-	if _, err := os.Stat(basedir + "/temp/exp01"); os.IsNotExist(err) {
-		os.Mkdir(basedir+"/temp/exp01", 0777)
+	if _, err := os.Stat(basedir + "/results/exp01"); os.IsNotExist(err) {
+		os.Mkdir(basedir+"/results/exp01", 0777)
 	}
 
 	wg := new(sync.WaitGroup)
@@ -51,7 +51,7 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
-	filename := basedir + "/temp/exp01/exp01_" + suffix + ".csv"
+	filename := basedir + "/results/exp01/exp01_" + suffix + ".csv"
 	file, err := os.Create(filename)
 	if err != nil {
 		panic(err)
@@ -127,7 +127,9 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 }
 
 // Run Simulation 1 using ns2 and return a slice of traces
-func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start float64, cbr_start float64, cbr_rate float64) []*pkg.Trace {
+func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start float64, cbr_start float64,
+	cbr_rate float64) []*pkg.Trace {
+
 	split := strings.Split(agent, "/")
 	suffix := split[len(split)-1]
 	filename := "outfile_" + suffix + ".tr"
