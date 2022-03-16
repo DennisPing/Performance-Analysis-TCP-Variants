@@ -7,7 +7,7 @@ Dennis Ping
 
 This project was initially done in Python and was ported to Go for self-learning purposes.
 
-All 3 experiments run with multithreading for faster computation. All 3 experiments run for 100 trails per test scenario in order to obtain statistical reliability. The graphs are generated with Python.
+All 3 experiments run with multithreading for faster computation. All 3 experiments run for 100 trails per test scenario in order to obtain statistical reliability. All graphs are generated with Python.
 
 ## Requirements
 
@@ -31,6 +31,15 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
     make exp01
     make exp02
     make exp03
+    ```
+
+## How to Run
+
+* cd into the bin directory
+    ```
+    ./exp01
+    ./exp02
+    ./exp03
     ```
 
 ## Project Setup
