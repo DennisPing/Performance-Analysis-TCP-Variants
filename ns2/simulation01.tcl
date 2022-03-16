@@ -117,7 +117,7 @@ $ns at [expr {$tcpStart+30.0}] "$cbr stop"
 $ns at [expr {$tcpStart+30.0}] "$ftp stop"
 
 # Detach tcp and sink agents
-$ns at [expr {$tcpStart+29.5}] "$ns detach-agent $n1 $tcp ; $ns detach-agent $n4 $sink"
+$ns at [expr {$tcpStart+30.0}] "$ns detach-agent $n1 $tcp ; $ns detach-agent $n4 $sink"
 
 # Call the finish procedure when the simulation is done
 $ns at [expr {$tcpStart+30.0}] "finish"
