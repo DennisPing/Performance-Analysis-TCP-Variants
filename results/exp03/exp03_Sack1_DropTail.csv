@@ -1,0 +1,2 @@
+avg_throughput1,std_throughput1,avg_latency1,std_latency1,avg_drops1,std_drops1,avg_throughput2,std_throughput2,avg_latency2,std_latency2,avg_drops2,std_drops2
+3.7629727060,0.4087450952,0.0108319399,0.0000000066,113.8823529412,6.2391774811,8.0169590061,0.0078410875,0.0107507054,0.0000230046,816.5490196078,95.4231676817
