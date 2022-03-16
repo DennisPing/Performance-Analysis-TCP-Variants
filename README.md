@@ -36,10 +36,19 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 ## How to Run
 
 * cd into the bin directory
-    ```
+    ```txt
     ./exp01
     ./exp02
     ./exp03
+    ```
+
+## How to Generate Graphs
+
+* cd into graph directory
+    ```txt
+    python3 graph_exp01.py
+    python3 graph_exp02.py
+    python3 graph_exp03.py
     ```
 
 ## Project Setup
@@ -50,7 +59,7 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 │   ├── exp01
 │   ├── exp02
 │   └── exp03
-├── cmd                 <-- Experiment 1, 2, 3 code
+├── cmd                 <-- Experiment 1, 2, 3 Go code
 │   ├── exp01
 │   │   └── main.go
 │   ├── exp02
@@ -68,11 +77,12 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 │   ├── simulation01.tcl
 │   ├── simulation02.tcl
 │   └── simulation03.tcl
-├── pkg                 <-- shared packages
+├── pkg                 <-- Shared Go code
 │   ├── stats.go
 │   └── trace.go
 ├── README.md
-└── results             <-- Experiment results
+├── res                 <-- Other resources
+└── results             <-- Experiment 1, 3, 3 results
     ├── exp01
     ├── exp02
     └── exp03
