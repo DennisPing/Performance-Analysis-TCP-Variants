@@ -83,17 +83,13 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 	cumul_latencies2 := make([]float64, 0)
 	cumul_drops2 := make([]float64, 0)
 
-	// sample_times := make([]float64, 0)
-	// sample_throughputs := make([]float64, 0)
-
 	// Simulation variables
-	fid := 1
 	from_node := 1 // ns2 counts from 0, so this is N2 -> N3
 	to_node := 2
 
 	// TCP starts at t=0, let it stabilize, then start CBR at t=5
 	for cbr_start := 5.0; cbr_start <= 10.0; cbr_start += 0.1 {
-		traces := Simulation03(agent, queue, fid, from_node, to_node, cbr_start)
+		traces := Simulation03(agent, queue, cbr_start)
 
 		// Prepare the trace data
 		tcpTraces := pkg.FilterByType(traces, "tcp")
@@ -122,25 +118,11 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 
 		// Record the time vs throughput for t=10 specifically
 		if math.Abs(cbr_start-10.0) < 0.001 {
-			// Write time_ticks1 (column 1) and thoughtput_ticks1 (column 2) to a csv file
-			file, err := os.Create(basedir + "/results/exp03/exp03_" + suffix + "_" + queue + "_TCP.csv")
-			if err != nil {
-				panic(err)
-			}
-			defer file.Close()
-			file.WriteString("time_ticks,throughput_ticks\n")
-			for i, tick := range time_ticks1 {
-				file.WriteString(fmt.Sprintf("%f,%f\n", tick, throughput_ticks1[i]))
-			}
-			file2, err2 := os.Create(basedir + "/results/exp03/exp03_" + suffix + "_" + queue + "_CBR.csv")
-			if err2 != nil {
-				panic(err2)
-			}
-			defer file2.Close()
-			file2.WriteString("time_ticks,throughput_ticks\n")
-			for i, tick := range time_ticks2 {
-				file2.WriteString(fmt.Sprintf("%f,%f\n", tick, throughput_ticks2[i]))
-			}
+			fname1 := basedir + "/results/exp03/exp03_" + suffix + "_" + queue + "_TCP.csv"
+			pkg.Record(time_ticks1, throughput_ticks1, "time_ticks", "throughput_ticks", fname1)
+
+			fname2 := basedir + "/results/exp03/exp03_" + suffix + "_" + queue + "_CBR.csv"
+			pkg.Record(time_ticks2, throughput_ticks2, "time_ticks", "throughput_ticks", fname2)
 		}
 	}
 
@@ -183,8 +165,8 @@ func Experiment03(wg *sync.WaitGroup, combo []string) {
 	}
 }
 
-// Run Simulation 2 using ns2 and return a slice of traces. CBR always starts at t=0 here.
-func Simulation03(agent string, queue string, fid int, from_node int, to_node int, cbr_start float64) []*pkg.Trace {
+// Run Simulation 3 using ns2 and return a slice of traces. CBR start time varies.
+func Simulation03(agent string, queue string, cbr_start float64) []*pkg.Trace {
 	split := strings.Split(agent, "/")
 	suffix := split[len(split)-1]
 	filename := "outfile_" + suffix + "_" + queue + ".tr"

@@ -72,12 +72,12 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 
 		// Simulation variables
 		fid := 1
-		from_node := 1 // ns2 counts from 0, so this is node #2 in the diagram
+		from_node := 1 // ns2 counts from 0, so this is N2 -> N3
 		to_node := 2
 		cbr_start := 0.0
 
 		for tcp_start := 0.5; tcp_start <= 5.5; tcp_start += 0.1 {
-			traces := Simulation01(agent, fid, from_node, to_node, tcp_start, cbr_start, float64(rate))
+			traces := Simulation01(agent, tcp_start, cbr_start, float64(rate))
 			// Prepare the trace data
 			traces = pkg.FilterByType(traces, "tcp")
 			traces = pkg.FilterByFid(traces, fid)
@@ -127,8 +127,7 @@ func Experiment01(wg *sync.WaitGroup, agent string) {
 }
 
 // Run Simulation 1 using ns2 and return a slice of traces
-func Simulation01(agent string, fid int, from_node int, to_node int, tcp_start float64, cbr_start float64,
-	cbr_rate float64) []*pkg.Trace {
+func Simulation01(agent string, tcp_start float64, cbr_start float64, cbr_rate float64) []*pkg.Trace {
 
 	split := strings.Split(agent, "/")
 	suffix := split[len(split)-1]

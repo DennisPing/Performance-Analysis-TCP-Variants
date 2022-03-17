@@ -92,12 +92,11 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 		cumul_drops2 := make([]float64, 0)
 
 		// Simulation variables
-		fid := 1
 		from_node := 1 // ns2 counts from 0, so this is N2 -> N3
 		to_node := 2
 
 		for tcp2_start := 0.0; tcp2_start <= 8.0; tcp2_start += 0.16 {
-			traces := Simulation02(agent1, agent2, fid, from_node, to_node, tcp2_start, float64(rate))
+			traces := Simulation02(agent1, agent2, tcp2_start, float64(rate))
 
 			// Prepare the trace data
 			traces = pkg.FilterByType(traces, "tcp")
@@ -166,7 +165,7 @@ func Experiment02(wg *sync.WaitGroup, combo []string) {
 }
 
 // Run Simulation 2 using ns2 and return a slice of traces. CBR always starts at t=0 here.
-func Simulation02(agent1 string, agent2 string, fid int, from_node int, to_node int, tcp2_start float64, cbr_rate float64) []*pkg.Trace {
+func Simulation02(agent1 string, agent2 string, tcp2_start float64, cbr_rate float64) []*pkg.Trace {
 	split1 := strings.Split(agent1, "/")
 	suffix1 := split1[len(split1)-1]
 	split2 := strings.Split(agent2, "/")
