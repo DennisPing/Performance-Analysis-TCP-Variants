@@ -44,7 +44,7 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 
 ## How to Generate Graphs
 
-* cd into graph directory
+* cd into the graph directory
     ```txt
     python3 graph_exp01.py
     python3 graph_exp02.py
@@ -78,6 +78,7 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 │   ├── simulation02.tcl
 │   └── simulation03.tcl
 ├── pkg                 <-- Shared Go code
+│   ├── recorder.go
 │   ├── stats.go
 │   └── trace.go
 ├── README.md
