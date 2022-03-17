@@ -150,11 +150,11 @@ func CalculateLatency(traces []*Trace, from_node int, to_node int, flow_start fl
 	end_traces := make(map[int]*Trace)   // Traces of event 'r'
 
 	// Iterate backwards through the trace list
-	// If you encounter a 'd' that matches from_node and to_node, skip the next 2 traces
+	// If you encounter a 'd', skip the next 2 traces
 	// The next 2 traces will always be '+' and 'r' at the exact same time
 	for i := len(traces) - 1; i >= 0; i-- {
 		trace := traces[i]
-		if trace.event == "d" && trace.from == from_node && trace.to == to_node {
+		if trace.event == "d" {
 			i -= 3
 			continue
 		} else if trace.event == "+" && trace.from == from_node && trace.to == to_node {
