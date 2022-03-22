@@ -20,8 +20,8 @@ type Trace struct {
 	pid         int
 }
 
-// ToString function for Trace struct
-func (t *Trace) ToString() string {
+// String function for Trace struct
+func (t *Trace) String() string {
 	str := t.event + " " +
 		strconv.FormatFloat(t.time, 'f', -1, 64) + " " +
 		strconv.Itoa(t.from) + " " +
