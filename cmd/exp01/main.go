@@ -17,7 +17,7 @@ import (
 func main() {
 
 	agents := []string{"Agent/TCP", "Agent/TCP/Reno", "Agent/TCP/Newreno", "Agent/TCP/Vegas"}
-	// agents := []string{"Agent/TCP/Reno"}
+
 	pwd, _ := os.Getwd()
 	basedir := filepath.Dir(pwd)
 
