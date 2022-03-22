@@ -12,7 +12,7 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 ## Requirements
 
 * Go 1.15+
-* Python 3.7+
+* Python 3.6+
     ```txt
     matplotlib
     numpy
