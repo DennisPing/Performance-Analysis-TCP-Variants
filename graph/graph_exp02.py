@@ -18,8 +18,7 @@ def plotDrops(df: pd.DataFrame, agent1: str, agent2: str, color1: str, color2: s
     ax.set_xlabel('CBR Rate (Mbps)')
     ax.set_ylabel('TCP Dropped Packets')
     ax.set_yticks(np.arange(0, 130, 20))
-    savefile = "{}/exp02_{}_{}_drops.png".format(save_dir, agent1, agent2)
-    fig.savefig(savefile)
+    fig.savefig(f"{save_dir}/exp02_{agent1}_{agent2}_drops.png")
 
 def plotLatency(df: pd.DataFrame, agent1: str, agent2: str, color1: str, color2: str, save_dir: str):
     fig, ax = plt.subplots()
@@ -32,9 +31,7 @@ def plotLatency(df: pd.DataFrame, agent1: str, agent2: str, color1: str, color2:
     ax.set_title(agent1 + "/" + agent2 + " Latency vs. CBR Rate")
     ax.set_xlabel('CBR Rate (Mbps)')
     ax.set_ylabel('TCP Latency (ms)')
-    # ax.set_yticks(np.arange(30, 55, 5))
-    savefile = "{}/exp02_{}_{}_latency.png".format(save_dir, agent1, agent2)
-    fig.savefig(savefile)
+    fig.savefig(f"{save_dir}/exp02_{agent1}_{agent2}_latency.png")
 
 def plotThroughput(df: pd.DataFrame, agent1: str, agent2: str, color1: str, color2: str, save_dir: str):
     fig, ax = plt.subplots()
@@ -48,8 +45,7 @@ def plotThroughput(df: pd.DataFrame, agent1: str, agent2: str, color1: str, colo
     ax.set_xlabel('CBR Rate (Mbps)')
     ax.set_ylabel('TCP Throughput (Mbps)')
     ax.set_yticks(np.arange(0, 10, 1))
-    savefile = "{}/exp02_{}_{}_throughput.png".format(save_dir, agent1, agent2)
-    fig.savefig(savefile)
+    fig.savefig(f"{save_dir}/exp02_{agent1}_{agent2}_throughput.png")
     
 
 def main():

@@ -43,9 +43,8 @@ def main():
             ax.legend()
             ax.set_xlabel('Time (s)')
             ax.set_ylabel('Throughput (Mbps)')
-            ax.set_title("{}/{} Throughput over Time".format(agent, queue))
-            filename = "{}/{}_{}_trace.png".format(dir, agent, queue)
-            fig.savefig(filename)
+            ax.set_title(f"{agent}/{queue} Throughput over Time")
+            fig.savefig(f"{dir}/{agent}_{queue}_trace.png")
 
             
 

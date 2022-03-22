@@ -13,7 +13,7 @@ def plotDrops(fig: plt.Figure, ax: plt.Axes, df: pd.DataFrame, agent_name: str, 
     ax.set_title("TCP Dropped Packets vs. CBR Rate")
     ax.set_xlabel('CBR Rate (Mbps)')
     ax.set_ylabel('TCP Dropped Packets')
-    fig.savefig("{}/exp01_drops.png".format(save_dir))
+    fig.savefig(f"{save_dir}/exp01_drops.png")
 
 def plotLatency(fig: plt.Figure, ax: plt.Axes, df: pd.DataFrame, agent_name: str, color: str, save_dir: str):
     ax.plot(df["cbr_rate"], df["avg_latency"]*1000, marker='o', label=agent_name, color=color)
@@ -23,7 +23,7 @@ def plotLatency(fig: plt.Figure, ax: plt.Axes, df: pd.DataFrame, agent_name: str
     ax.set_title("TCP Latency vs. CBR Rate")
     ax.set_xlabel('CBR Rate (Mbps)')
     ax.set_ylabel('TCP Latency (ms)')
-    fig.savefig("{}/exp01_latency.png".format(save_dir))
+    fig.savefig(f"{save_dir}/exp01_latency.png")
 
 def plotThroughput(fig: plt.Figure, ax: plt.Axes, df: pd.DataFrame, agent_name: str, color: str, save_dir: str):
     ax.plot(df["cbr_rate"], df["avg_throughput"], marker='o', label=agent_name, color=color)
@@ -34,7 +34,7 @@ def plotThroughput(fig: plt.Figure, ax: plt.Axes, df: pd.DataFrame, agent_name: 
     ax.set_xlabel('CBR Rate (Mbps)')
     ax.set_ylabel('TCP Throughput (Mbps)')
     ax.set_yticks(np.arange(0, 10, 1))
-    fig.savefig("{}/exp01_throughput.png".format(save_dir))
+    fig.savefig(f"{save_dir}/exp01_throughput.png")
     
 
 def main():
