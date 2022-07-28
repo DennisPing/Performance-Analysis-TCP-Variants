@@ -13,11 +13,6 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
 
 * Go 1.15+
 * Python 3.6+
-    ```txt
-    matplotlib
-    numpy
-    pandas
-    ```
 
 ## How to Build
 
@@ -43,6 +38,11 @@ All 3 experiments run with multithreading for faster computation. All 3 experime
     ```
 
 ## How to Generate Graphs
+
+* Install Python dependencies
+    ```txt
+    python3 -m pip install -r requirements.txt
+    ```
 
 * cd into the graph directory
     ```txt
